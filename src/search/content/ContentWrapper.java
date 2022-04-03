@@ -3,7 +3,7 @@ package search.content;
 /**
  * @author Pavel Lymar
  */
-public abstract class ContentWrapper {
+public abstract class ContentWrapper implements Comparable<ContentWrapper> {
     private final String name;
 
     protected ContentWrapper(String name) {
@@ -15,4 +15,8 @@ public abstract class ContentWrapper {
     }
 
     public abstract double getDefaultRelevance();
+
+    public int compareTo(ContentWrapper o) {
+        return name.compareTo(o.name);
+    }
 }

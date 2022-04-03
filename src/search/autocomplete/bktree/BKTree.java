@@ -1,9 +1,8 @@
 package search.autocomplete.bktree;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import search.autocomplete.DataIndexNode;
+
+import java.util.*;
 
 /**
  * @author Pavel Lymar
@@ -12,40 +11,44 @@ public class BKTree {
     private BKTreeNode root;
 
     public BKTree() {
-        root = null;
+        this.root = null;
     }
 
-    public void add(String word) {
+    public void add(DataIndexNode node) {
         if (root == null) {
-            root = new BKTreeNode(word);
+            root = new BKTreeNode(node);
         } else {
             BKTreeNode current = root;
-            int distance = calculateDistance(current.getWord(), word);
+            int distance = calculateDistance(current.getName(), node.getName());
             while (current.getChild(distance) != null) {
                 current = current.getChild(distance);
-                if (calculateDistance(current.getWord(), word) == 0) {
+                distance = calculateDistance(current.getName(), node.getName());
+                if (distance == 0) {
                     return;
                 }
             }
-            current.addChild(distance, new BKTreeNode(word));
+            current.addChild(distance, new BKTreeNode(node));
         }
     }
 
-    public void addAll(List<String> words) {
-        words.forEach(this::add);
+    public void addAll(List<DataIndexNode> nodes) {
+        nodes.forEach(this::add);
     }
 
-    public Map<Integer, List<BKTreeNode>> search(String word, int distanceThreshold) {
-        Map<Integer, List<BKTreeNode>> results = new HashMap<>();
+    public Map<Integer, TreeSet<BKTreeNode>> search(String word, int distanceThreshold) {
+        Map<Integer, TreeSet<BKTreeNode>> results = new HashMap<>();
         search(root, word, distanceThreshold, results);
         return results;
     }
 
-    private void search(BKTreeNode node, String word, int distanceThreshold, Map<Integer, List<BKTreeNode>> results) {
-        int distance = calculateDistance(node.getWord(), word);
+    private void search(BKTreeNode node, String word, int distanceThreshold, Map<Integer, TreeSet<BKTreeNode>> results) {
+        if (node == null) {
+            return;
+        }
+        int distance = calculateDistance(node.getName(), word);
         if (distance <= distanceThreshold) {
             if (!results.containsKey(distance)) {
-                results.put(distance, new ArrayList<>());
+                results.put(distance, new TreeSet<>());
             }
             results.get(distance).add(node);
         }

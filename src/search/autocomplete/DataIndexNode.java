@@ -1,9 +1,12 @@
 package search.autocomplete;
 
+import search.autocomplete.bktree.BKTree;
+import search.autocomplete.bktree.BKTreeNode;
 import search.content.ContentWrapper;
 import search.content.Query;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -17,35 +20,40 @@ public class DataIndexNode implements Comparable<DataIndexNode> {
     private final ContentWrapper content;
     private double relevance;
     private final TreeSet<DataIndexNode> children;
-    private final Map<String, DataIndexNode> nameToNode;
+    private final BKTree bkTree;
 
     public DataIndexNode(String name) {
-        children = new TreeSet<>();
-        nameToNode = new HashMap<>();
+        this.children = new TreeSet<>();
         this.content = new Query(name.toLowerCase());
+        this.bkTree = new BKTree();
     }
 
     public DataIndexNode(ContentWrapper content) {
-        children = new TreeSet<>();
-        nameToNode = new HashMap<>();
+        this.children = new TreeSet<>();
         this.content = content;
+        this.bkTree = new BKTree();
     }
 
     public String getName() {
         return content.getName();
     }
 
-    public Map<String, DataIndexNode> getNameToNode() {
-        return nameToNode;
+    public DataIndexNode getChildByName(String name, int distanceThreshold) {
+        Map<Integer, TreeSet<BKTreeNode>> searchResult = bkTree.search(name, distanceThreshold);
+        Integer distance = searchResult.keySet().stream().min(Integer::compareTo).orElse(null);
+        if (distance == null) {
+            return null;
+        }
+        return searchResult.get(distance).last().getContent();
     }
 
-    public TreeSet<DataIndexNode> getChildren() {
-        return children;
+    public List<DataIndexNode> getSortedChildren() {
+        return new ArrayList<>(children);
     }
 
     public DataIndexNode addChild(DataIndexNode node) {
         children.add(node);
-        nameToNode.put(node.content.getName(), node);
+        bkTree.add(node);
         return node;
     }
 
@@ -63,6 +71,10 @@ public class DataIndexNode implements Comparable<DataIndexNode> {
 
     @Override
     public int compareTo(DataIndexNode o) {
-        return Double.compare(o.relevance, relevance);
+        int result = Double.compare(o.relevance, relevance);
+        if (result == 0) {
+            return content.compareTo(o.content);
+        }
+        return result;
     }
 }

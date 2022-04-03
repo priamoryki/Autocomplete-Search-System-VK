@@ -1,5 +1,7 @@
 package search.autocomplete.bktree;
 
+import search.autocomplete.DataIndexNode;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,12 +10,12 @@ import java.util.stream.Collectors;
 /**
  * @author Pavel Lymar
  */
-public class BKTreeNode {
-    private final String word;
+public class BKTreeNode implements Comparable<BKTreeNode> {
+    private final DataIndexNode content;
     private final Map<Integer, BKTreeNode> children;
 
-    public BKTreeNode(String word) {
-        this.word = word;
+    public BKTreeNode(DataIndexNode content) {
+        this.content = content;
         this.children = new HashMap<>();
     }
 
@@ -26,10 +28,20 @@ public class BKTreeNode {
     }
 
     public List<Integer> getChildKeysWithinDistance(int minDistance, int maxDistance) {
-        return children.keySet().stream().filter(n -> n >= minDistance && n <= maxDistance).collect(Collectors.toList());
+        return children.keySet().stream()
+                .filter(n -> minDistance <= n && n <= maxDistance).collect(Collectors.toList());
     }
 
-    public String getWord() {
-        return word;
+    public String getName() {
+        return content.getName();
+    }
+
+    public DataIndexNode getContent() {
+        return content;
+    }
+
+    @Override
+    public int compareTo(BKTreeNode o) {
+        return content.compareTo(o.content);
     }
 }
