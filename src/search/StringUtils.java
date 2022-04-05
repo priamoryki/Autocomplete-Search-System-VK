@@ -1,4 +1,4 @@
-package search.autocomplete;
+package search;
 
 import java.util.ArrayDeque;
 import java.util.List;

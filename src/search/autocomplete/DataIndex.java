@@ -1,6 +1,6 @@
 package search.autocomplete;
 
-import search.DataIndexNode;
+import search.StringUtils;
 import search.autocomplete.automata.Automata;
 import search.autocomplete.automata.LevenshteinAutomata;
 import search.content.Content;

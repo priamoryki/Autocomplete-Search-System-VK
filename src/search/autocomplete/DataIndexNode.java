@@ -1,4 +1,4 @@
-package search;
+package search.autocomplete;
 
 import search.content.Content;
 
