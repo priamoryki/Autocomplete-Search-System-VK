@@ -37,7 +37,7 @@ public class StringUtils {
     }
 
     public static ArrayDeque<String> splitIntoWords(String query) {
-        return new ArrayDeque<>(List.of(query.split("[\\p{Punct}\\s&&[^']]+")));
+        return new ArrayDeque<>(List.of(query.split("[\\p{Punct}\\s&&[^'-]]+")));
     }
 
     public static double getMaxThreshold(String s) {

@@ -15,6 +15,8 @@ public abstract class Automata {
         return pattern;
     }
 
+    public abstract double getRelevance();
+
     public String getWord() {
         return word;
     }
@@ -25,10 +27,17 @@ public abstract class Automata {
 
     public abstract Automata step(char symbol);
 
-    public Automata stepUntilCorrectWord(String symbols) {
+    public Automata step(String symbols) {
+        if (symbols.length() == 0) {
+            return this;
+        }
+        return step(symbols.charAt(0)).step(symbols.substring(1));
+    }
+
+    public Automata stepWhileCorrect(String symbols) {
         if (symbols.length() == 0 || isCorrectWord()) {
             return this;
         }
-        return step(symbols.charAt(0)).stepUntilCorrectWord(symbols.substring(1));
+        return step(symbols.charAt(0)).stepWhileCorrect(symbols.substring(1));
     }
 }

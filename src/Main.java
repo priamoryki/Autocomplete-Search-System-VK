@@ -1,4 +1,4 @@
-import search.autocomplete.DataIndex;
+import search.autocomplete.index.DataIndex;
 import search.content.Content;
 import search.content.Query;
 
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * This is the example of usage
+ * This is the example of DataIndex usage.
  *
  * @author Pavel Lymar
  */
@@ -49,8 +49,9 @@ public class Main {
             String query = scn.nextLine();
             System.out.println("Suggestions to your query: ");
             // Printing the result for the query
-            for (Content result : trie.search(query)) {
-                System.out.println(result.toString());
+            int i = 1;
+            for (Content result : trie.search(query, 5)) {
+                System.out.println(i++ + ") " + result.toString());
             }
         }
     }

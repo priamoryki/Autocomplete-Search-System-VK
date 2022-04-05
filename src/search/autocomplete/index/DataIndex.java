@@ -1,13 +1,18 @@
-package search.autocomplete;
+package search.autocomplete.index;
 
 import search.StringUtils;
 import search.autocomplete.automata.Automata;
 import search.autocomplete.automata.LevenshteinAutomata;
+import search.autocomplete.result.ResultWrapper;
 import search.content.Content;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
+/**
+ * @author Pavel Lymar
+ */
 public class DataIndex {
     private final DataIndexNode root;
 
@@ -52,44 +57,48 @@ public class DataIndex {
         add(nextNode, name.substring(maxCommonPrefixLength), content);
     }
 
-    public TreeSet<Content> search(String phrase) {
+    public List<Content> search(String phrase, int limit) {
+        return search(phrase).stream().limit(limit).collect(Collectors.toList());
+    }
+
+    public List<Content> search(String phrase) {
         ArrayDeque<String> words = StringUtils.splitIntoWords(phrase.toLowerCase());
-        TreeSet<Content> result = new TreeSet<>();
+        TreeSet<ResultWrapper> result = new TreeSet<>();
         if (!words.isEmpty()) {
             String word = words.pop();
-            result.addAll(
-                    search(root, "", new LevenshteinAutomata(word, StringUtils.getMaxThreshold(word)))
-            );
+            result.addAll(search(root, "", new LevenshteinAutomata(word, StringUtils.getMaxThreshold(word))));
         }
         while (!words.isEmpty()) {
             String word = words.pop();
-            result.retainAll(
-                    search(root, "", new LevenshteinAutomata(word, StringUtils.getMaxThreshold(word)))
-            );
+            result.retainAll(search(root, "", new LevenshteinAutomata(word, StringUtils.getMaxThreshold(word))));
+        }
+        return result.stream().map(ResultWrapper::getContent).collect(Collectors.toList());
+    }
+
+    private TreeSet<ResultWrapper> getAllContentInSubTree(DataIndexNode node, Automata automata) {
+        TreeSet<ResultWrapper> result = new TreeSet<>();
+        for (Content content : node.getAllContent()) {
+            result.add(new ResultWrapper(content, automata.getRelevance()));
+        }
+        for (Map.Entry<String, DataIndexNode> entry : node.getChildren().entrySet()) {
+            result.addAll(getAllContentInSubTree(entry.getValue(), automata.step(entry.getKey())));
         }
         return result;
     }
 
-    private TreeSet<Content> getAllContentInSubTree(DataIndexNode node) {
-        TreeSet<Content> result = new TreeSet<>(node.getAllContent());
-        for (DataIndexNode nextNode : node.getChildren().values()) {
-            result.addAll(getAllContentInSubTree(nextNode));
-        }
-        return result;
-    }
-
-    private TreeSet<Content> search(DataIndexNode node, String prefix, Automata automata) {
+    private TreeSet<ResultWrapper> search(DataIndexNode node, String prefix, Automata automata) {
         if (automata.isCorrectWord()) {
-            return getAllContentInSubTree(node);
-        } else if (!automata.isIncorrectWord()) {
-            TreeSet<Content> result = new TreeSet<>();
-            for (Map.Entry<String, DataIndexNode> entry : node.getChildren().entrySet()) {
-                String transition = entry.getKey();
-                DataIndexNode nextNode = entry.getValue();
-                result.addAll(search(nextNode, prefix + transition, automata.stepUntilCorrectWord(transition)));
-            }
-            return result;
+            return getAllContentInSubTree(node, automata);
         }
-        return new TreeSet<>();
+        if (automata.isIncorrectWord()) {
+            return new TreeSet<>();
+        }
+        TreeSet<ResultWrapper> result = new TreeSet<>();
+        for (Map.Entry<String, DataIndexNode> entry : node.getChildren().entrySet()) {
+            String transition = entry.getKey();
+            DataIndexNode nextNode = entry.getValue();
+            result.addAll(search(nextNode, prefix + transition, automata.stepWhileCorrect(transition)));
+        }
+        return result;
     }
 }

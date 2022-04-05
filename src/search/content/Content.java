@@ -26,8 +26,9 @@ public abstract class Content implements Comparable<Content> {
 
     public abstract double getDefaultRelevance();
 
+    @Override
     public int compareTo(Content o) {
-        int result = Double.compare(relevance, o.relevance);
+        int result = Double.compare(o.relevance, relevance);
         if (result == 0) {
             return name.compareTo(o.name);
         }

@@ -1,5 +1,7 @@
 package search.autocomplete.automata;
 
+import java.util.Arrays;
+
 /**
  * @author Pavel Lymar
  */
@@ -30,18 +32,22 @@ public final class LevenshteinAutomata extends Automata {
     }
 
     @Override
+    public double getRelevance() {
+        int length = Math.max(pattern.length(), word.length());
+        if (length == 0) {
+            return 1;
+        }
+        return 1 - getDistance() / (double) length;
+    }
+
+    @Override
     public boolean isCorrectWord() {
         return getDistance() <= threshold;
     }
 
     @Override
     public boolean isIncorrectWord() {
-        for (int i : vector) {
-            if (i <= threshold) {
-                return false;
-            }
-        }
-        return true;
+        return Arrays.stream(vector).min().orElse(Integer.MAX_VALUE) > threshold;
     }
 
     @Override
