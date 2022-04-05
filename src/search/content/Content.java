@@ -1,6 +1,11 @@
 package search.content;
 
 /**
+ * Abstract class that stores information based on witch we can sort search results.
+ * @see Query
+ * @see Movie
+ * @see Product
+ *
  * @author Pavel Lymar
  */
 public abstract class Content implements Comparable<Content> {

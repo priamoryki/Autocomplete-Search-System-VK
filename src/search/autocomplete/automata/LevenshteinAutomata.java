@@ -3,6 +3,9 @@ package search.autocomplete.automata;
 import java.util.Arrays;
 
 /**
+ * Default {@code LevenshteinAutomata} to make steps based on Edit Distance.
+ * @see Automata
+ *
  * @author Pavel Lymar
  */
 public final class LevenshteinAutomata extends Automata {

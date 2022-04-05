@@ -3,6 +3,9 @@ package search.autocomplete.result;
 import search.content.Content;
 
 /**
+ * Wrapper to sort {@link search.autocomplete.index.DataIndex#search(String)} results.
+ * Have related {@link Content} and relevance value inside.
+ *
  * @author Pavel Lymar
  */
 public class ResultWrapper implements Comparable<ResultWrapper> {

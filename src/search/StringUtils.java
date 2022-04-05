@@ -4,7 +4,7 @@ import java.util.ArrayDeque;
 import java.util.List;
 
 /**
- * Utility class to count distance between words.
+ * Utility class to count distance between words, get common strings prefix, split string into words etc.
  *
  * @author Pavel Lymar
  */
@@ -36,6 +36,12 @@ public class StringUtils {
         return i;
     }
 
+    /**
+     * Splits {@code query} by whitespaces and punctuations except "'" and "-".
+     *
+     * @param query {@link String} you need to split.
+     * @return {@link ArrayDeque} of wards.
+     */
     public static ArrayDeque<String> splitIntoWords(String query) {
         return new ArrayDeque<>(List.of(query.split("[\\p{Punct}\\s&&[^'-]]+")));
     }

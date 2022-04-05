@@ -11,6 +11,14 @@ import java.util.stream.Collectors;
 
 
 /**
+ * This class is simply prefix tree with memory optimization and search based on {@link LevenshteinAutomata}.
+ * So depth of recursion would be {@code O(n)} ({@code n} is length of word).
+ * <p>
+ * Note: This can be easily made as abstraction, but I don't want this for the sake of execution time optimization.
+ * </p>
+ * @see DataIndexNode
+ * @see LevenshteinAutomata
+ *
  * @author Pavel Lymar
  */
 public class DataIndex {
@@ -20,14 +28,14 @@ public class DataIndex {
         this.root = new DataIndexNode();
     }
 
+    public void addAll(List<Content> contentList) {
+        contentList.forEach(this::add);
+    }
+
     public void add(Content content) {
         for (String word : StringUtils.splitIntoWords(content.getName().toLowerCase())) {
             add(root, word, content);
         }
-    }
-
-    public void addAll(List<Content> contentList) {
-        contentList.forEach(this::add);
     }
 
     private void add(DataIndexNode node, String name, Content content) {
@@ -57,10 +65,24 @@ public class DataIndex {
         add(nextNode, name.substring(maxCommonPrefixLength), content);
     }
 
+    /**
+     * @see #search(String)
+     * @param phrase query to base on.
+     * @param limit limit of {@link Content} that will be returned.
+     * @return sorted result of search.
+     */
     public List<Content> search(String phrase, int limit) {
         return search(phrase).stream().limit(limit).collect(Collectors.toList());
     }
 
+    /**
+     * Returns sorted {@link List} of {@link Content}.
+     * If input has list of words searches for each word and makes the intersection of results.
+     * @see #search(DataIndexNode, String, Automata)
+     *
+     * @param phrase query to base on.
+     * @return sorted result of search.
+     */
     public List<Content> search(String phrase) {
         ArrayDeque<String> words = StringUtils.splitIntoWords(phrase.toLowerCase());
         TreeSet<ResultWrapper> result = new TreeSet<>();
@@ -75,20 +97,15 @@ public class DataIndex {
         return result.stream().map(ResultWrapper::getContent).collect(Collectors.toList());
     }
 
-    private TreeSet<ResultWrapper> getAllContentInSubTree(DataIndexNode node, Automata automata) {
-        TreeSet<ResultWrapper> result = new TreeSet<>();
-        for (Content content : node.getAllContent()) {
-            result.add(new ResultWrapper(content, automata.getRelevance()));
-        }
-        for (Map.Entry<String, DataIndexNode> entry : node.getChildren().entrySet()) {
-            result.addAll(getAllContentInSubTree(entry.getValue(), automata.step(entry.getKey())));
-        }
-        return result;
-    }
-
+    /**
+     * @param node current node in the tree.
+     * @param prefix prefix name of this node.
+     * @param automata automata to base search on.
+     * @return allContent of {@code DataIndexNode}'s corresponding to the {@code automata}.
+     */
     private TreeSet<ResultWrapper> search(DataIndexNode node, String prefix, Automata automata) {
         if (automata.isCorrectWord()) {
-            return getAllContentInSubTree(node, automata);
+            return node.getAllContentInSubTree(automata);
         }
         if (automata.isIncorrectWord()) {
             return new TreeSet<>();
