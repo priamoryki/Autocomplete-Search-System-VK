@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * This is the example of usage
+ *
  * @author Pavel Lymar
  */
 public class Main {
@@ -38,6 +40,7 @@ public class Main {
             System.err.println(e.getMessage());
         }
 
+        // Creating Data Index
         DataIndex trie = new DataIndex();
         trie.addAll(queries.stream().map(Query::new).collect(Collectors.toList()));
 
@@ -45,6 +48,7 @@ public class Main {
             System.out.print("Enter your query: ");
             String query = scn.nextLine();
             System.out.println("Suggestions to your query: ");
+            // Printing the result for the query
             for (Content result : trie.search(query)) {
                 System.out.println(result.toString());
             }

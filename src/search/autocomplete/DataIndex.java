@@ -1,67 +1,95 @@
 package search.autocomplete;
 
-import search.autocomplete.bktree.BKTree;
+import search.DataIndexNode;
+import search.autocomplete.automata.Automata;
+import search.autocomplete.automata.LevenshteinAutomata;
+import search.content.Content;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-/**
- * This class in simply Suffix Tree with checking the most similar word in children using {@link BKTree}
- * while going down.
- *
- * @author Pavel Lymar
- */
+
 public class DataIndex {
     private final DataIndexNode root;
 
     public DataIndex() {
-        this.root = new DataIndexNode("");
+        this.root = new DataIndexNode();
     }
 
-    public void addQuery(Deque<String> query) {
-        addQuery(root, query);
+    public void add(Content content) {
+        for (String word : StringUtils.splitIntoWords(content.getName().toLowerCase())) {
+            add(root, word, content);
+        }
     }
 
-    private void addQuery(DataIndexNode node, Deque<String> query) {
-        if (query.isEmpty()) {
-            node.addRelevance(node.getDefaultRelevance());
+    public void addAll(List<Content> contentList) {
+        contentList.forEach(this::add);
+    }
+
+    private void add(DataIndexNode node, String name, Content content) {
+        if (name.length() == 0) {
+            node.addContent(content);
             return;
         }
-        String nextWord = query.pop().toLowerCase();
-        DataIndexNode nextNode = node.getChildByName(nextWord, 0);
-        if (nextNode == null) {
-            nextNode = node.addChild(new DataIndexNode(nextWord));
-        }
-        addQuery(nextNode, query);
-        node.addRelevance(nextNode.getRelevance());
-    }
-
-    public void addQueries(List<String> queries) {
-        for (String query : queries) {
-            addQuery(splitIntoWords(query));
-        }
-    }
-
-    public List<String> getSuggestions(String query) {
-        DataIndexNode node = root;
-        StringBuilder path = new StringBuilder();
-        for (String word : splitIntoWords(query)) {
-            word = word.toLowerCase();
-            node = node.getChildByName(word, distanceThreshold(word));
-            if (node == null) {
-                return new ArrayList<>();
+        int maxCommonPrefixLength = 0;
+        String transition = "";
+        for (Map.Entry<String, DataIndexNode> entry : node.getChildren().entrySet()) {
+            int prefixLength = StringUtils.getCommonPrefix(entry.getKey(), name);
+            if (prefixLength > maxCommonPrefixLength) {
+                maxCommonPrefixLength = prefixLength;
+                transition = entry.getKey();
             }
-            path.append(node.getName()).append(" ");
         }
-        System.out.println(path);
-        return node.getSortedChildren().stream().map(DataIndexNode::getName).collect(Collectors.toList());
+        DataIndexNode nextNode = node.getChildren().get(transition);
+        if (0 < maxCommonPrefixLength && maxCommonPrefixLength < transition.length()) {
+            // Splitting the DataIndexNode
+            nextNode = node.addChild(transition.substring(0, maxCommonPrefixLength), new DataIndexNode());
+            nextNode.addChild(transition.substring(maxCommonPrefixLength), node.deleteChild(transition));
+        }
+        if (nextNode == null) {
+            nextNode = node.addChild(name, new DataIndexNode());
+            maxCommonPrefixLength = name.length();
+        }
+        add(nextNode, name.substring(maxCommonPrefixLength), content);
     }
 
-    private int distanceThreshold(String name) {
-        return (int) Math.round((1 - 0.65) * name.length());
+    public TreeSet<Content> search(String phrase) {
+        ArrayDeque<String> words = StringUtils.splitIntoWords(phrase.toLowerCase());
+        TreeSet<Content> result = new TreeSet<>();
+        if (!words.isEmpty()) {
+            String word = words.pop();
+            result.addAll(
+                    search(root, "", new LevenshteinAutomata(word, StringUtils.getMaxThreshold(word)))
+            );
+        }
+        while (!words.isEmpty()) {
+            String word = words.pop();
+            result.retainAll(
+                    search(root, "", new LevenshteinAutomata(word, StringUtils.getMaxThreshold(word)))
+            );
+        }
+        return result;
     }
 
-    private ArrayDeque<String> splitIntoWords(String query) {
-        return new ArrayDeque<>(List.of(query.split("[.,\\s]+")));
+    private TreeSet<Content> getAllContentInSubTree(DataIndexNode node) {
+        TreeSet<Content> result = new TreeSet<>(node.getAllContent());
+        for (DataIndexNode nextNode : node.getChildren().values()) {
+            result.addAll(getAllContentInSubTree(nextNode));
+        }
+        return result;
+    }
+
+    private TreeSet<Content> search(DataIndexNode node, String prefix, Automata automata) {
+        if (automata.isCorrectWord()) {
+            return getAllContentInSubTree(node);
+        } else if (!automata.isIncorrectWord()) {
+            TreeSet<Content> result = new TreeSet<>();
+            for (Map.Entry<String, DataIndexNode> entry : node.getChildren().entrySet()) {
+                String transition = entry.getKey();
+                DataIndexNode nextNode = entry.getValue();
+                result.addAll(search(nextNode, prefix + transition, automata.stepUntilCorrectWord(transition)));
+            }
+            return result;
+        }
+        return new TreeSet<>();
     }
 }
