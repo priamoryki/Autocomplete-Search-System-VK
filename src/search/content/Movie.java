@@ -3,7 +3,7 @@ package search.content;
 /**
  * @author Pavel Lymar
  */
-public class Movie extends ContentWrapper {
+public class Movie extends Content {
     private final double rating;
 
     public Movie(String name, double rating) {

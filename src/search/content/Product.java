@@ -3,7 +3,7 @@ package search.content;
 /**
  * @author Pavel Lymar
  */
-public class Product extends ContentWrapper {
+public class Product extends Content {
     private final double price;
 
     public Product(String name, double price) {

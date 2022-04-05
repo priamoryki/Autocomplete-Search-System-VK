@@ -1,10 +1,13 @@
 import search.autocomplete.DataIndex;
+import search.content.Content;
+import search.content.Query;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Pavel Lymar
@@ -35,14 +38,16 @@ public class Main {
             System.err.println(e.getMessage());
         }
 
-        DataIndex dataSource = new DataIndex();
-        dataSource.addQueries(queries);
+        DataIndex trie = new DataIndex();
+        trie.addAll(queries.stream().map(Query::new).collect(Collectors.toList()));
 
         while (true) {
             System.out.print("Enter your query: ");
             String query = scn.nextLine();
-            System.out.println("Suggestions to your query: " +
-                    String.join(", ", dataSource.getSuggestions(query)));
+            System.out.println("Suggestions to your query: ");
+            for (Content result : trie.search(query)) {
+                System.out.println(result.toString());
+            }
         }
     }
 }
