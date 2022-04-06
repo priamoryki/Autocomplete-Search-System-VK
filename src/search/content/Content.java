@@ -33,9 +33,9 @@ public abstract class Content implements Comparable<Content> {
 
     @Override
     public int compareTo(Content o) {
-        int result = Double.compare(o.relevance, relevance);
+        int result = name.compareTo(o.name);
         if (result == 0) {
-            return name.compareTo(o.name);
+            return this.getClass().getName().compareTo(o.getClass().getName());
         }
         return result;
     }

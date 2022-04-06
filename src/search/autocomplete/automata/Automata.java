@@ -48,18 +48,4 @@ public abstract class Automata {
         }
         return step(symbols.charAt(0)).step(symbols.substring(1));
     }
-
-    /**
-     * Making the step in {@code Automata} based on {@link String} while state isn't incorrect.
-     * Called if we need to go down in {@link search.autocomplete.index.DataIndex}
-     *
-     * @param symbols corresponds to the {@link String} that we want to make step to.
-     * @return new state {@code Automata}.
-     */
-    public Automata stepWhileCorrect(String symbols) {
-        if (symbols.length() == 0 || isCorrectWord()) {
-            return this;
-        }
-        return step(symbols.charAt(0)).stepWhileCorrect(symbols.substring(1));
-    }
 }

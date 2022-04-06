@@ -4,22 +4,22 @@ import java.util.Arrays;
 
 /**
  * Default {@code LevenshteinAutomata} to make steps based on Edit Distance.
- * @see Automata
  *
  * @author Pavel Lymar
+ * @see Automata
  */
 public final class LevenshteinAutomata extends Automata {
     private final int size;
     private final double threshold;
-    private final int[] vector;
+    private final int[] distances;
 
     public LevenshteinAutomata(String pattern, double threshold) {
         super(pattern, "");
         this.size = pattern.length() + 1;
         this.threshold = threshold;
-        this.vector = new int[size];
+        this.distances = new int[size];
         for (int i = 0; i < size; i++) {
-            this.vector[i] = i;
+            this.distances[i] = i;
         }
     }
 
@@ -27,11 +27,11 @@ public final class LevenshteinAutomata extends Automata {
         super(pattern, word);
         this.size = pattern.length() + 1;
         this.threshold = threshold;
-        this.vector = vector;
+        this.distances = vector;
     }
 
     private int getDistance() {
-        return vector[size - 1];
+        return distances[size - 1];
     }
 
     @Override
@@ -50,21 +50,18 @@ public final class LevenshteinAutomata extends Automata {
 
     @Override
     public boolean isIncorrectWord() {
-        return Arrays.stream(vector).min().orElse(Integer.MAX_VALUE) > threshold;
+        return Arrays.stream(distances).min().orElse(Integer.MAX_VALUE) > threshold;
     }
 
     @Override
     public LevenshteinAutomata step(char symbol) {
-        int[] newVector = new int[size];
-        newVector[0] = vector[0] + 1;
+        int[] newDistances = new int[size];
+        newDistances[0] = distances[0] + 1;
         for (int i = 1; i < size; i++) {
-            if (pattern.charAt(i - 1) == symbol) {
-                newVector[i] = vector[i - 1];
-            } else {
-                newVector[i] = Math.min(newVector[i - 1], Math.min(vector[i], vector[i - 1])) + 1;
-            }
+            newDistances[i] = pattern.charAt(i - 1) == symbol ?
+                    distances[i - 1] : Math.min(newDistances[i - 1], Math.min(distances[i], distances[i - 1])) + 1;
         }
-        return new LevenshteinAutomata(pattern, word + symbol, threshold, newVector);
+        return new LevenshteinAutomata(pattern, word + symbol, threshold, newDistances);
     }
 }
 

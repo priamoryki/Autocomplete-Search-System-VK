@@ -3,7 +3,7 @@ package search.content;
 /**
  * @author Pavel Lymar
  */
-public class Query extends Content {
+public final class Query extends Content {
     public Query(String name) {
         super(name);
     }

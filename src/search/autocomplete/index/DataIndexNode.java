@@ -32,6 +32,7 @@ public class DataIndexNode {
     }
 
     public void addContent(Content content) {
+        allContent.remove(content);
         allContent.add(content);
     }
 
@@ -44,9 +45,9 @@ public class DataIndexNode {
     }
 
     /**
-     * @see Automata#getRelevance
      * @param automata automata to base search sort on.
      * @return content in all subtree that is stored in nodes.
+     * @see Automata#getRelevance
      */
     public TreeSet<ResultWrapper> getAllContentInSubTree(Automata automata) {
         TreeSet<ResultWrapper> result = new TreeSet<>();

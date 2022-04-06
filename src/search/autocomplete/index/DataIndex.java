@@ -33,6 +33,14 @@ public class DataIndex {
     }
 
     public void add(Content content) {
+        // root contains all queries, so if you need to update the relevance of Content you can just change content in
+        // the root and remove all such content in node#allContent and then add new content
+        if (root.getAllContent().contains(content)) {
+            content.addRelevance(root.getAllContent().tailSet(content, true).first().getRelevance());
+            root.getAllContent().remove(content);
+        }
+        root.getAllContent().add(content);
+
         for (String word : StringUtils.splitIntoWords(content.getName().toLowerCase())) {
             add(root, word, content);
         }
@@ -114,7 +122,7 @@ public class DataIndex {
         for (Map.Entry<String, DataIndexNode> entry : node.getChildren().entrySet()) {
             String transition = entry.getKey();
             DataIndexNode nextNode = entry.getValue();
-            result.addAll(search(nextNode, prefix + transition, automata.stepWhileCorrect(transition)));
+            result.addAll(search(nextNode, prefix + transition, automata.step(transition)));
         }
         return result;
     }

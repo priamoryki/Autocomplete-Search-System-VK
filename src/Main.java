@@ -1,3 +1,4 @@
+import search.StringUtils;
 import search.autocomplete.index.DataIndex;
 import search.content.Content;
 import search.content.Query;
@@ -33,7 +34,7 @@ public class Main {
                     do {
                         movieTitle.append(fileScanner.nextChar());
                     } while (movieTitle.charAt(movieTitle.length() - 1) != '<');
-                    queries.add(movieTitle.substring(0, movieTitle.length() - 1));
+                    queries.add(movieTitle.substring(0, movieTitle.length() - 1).trim());
                 }
             }
         } catch (IOException e) {
@@ -41,8 +42,8 @@ public class Main {
         }
 
         // Creating Data Index
-        DataIndex trie = new DataIndex();
-        trie.addAll(queries.stream().map(Query::new).collect(Collectors.toList()));
+        DataIndex dataIndex = new DataIndex();
+        dataIndex.addAll(queries.stream().map(Query::new).collect(Collectors.toList()));
 
         while (true) {
             System.out.print("Enter your query: ");
@@ -50,7 +51,7 @@ public class Main {
             System.out.println("Suggestions to your query: ");
             // Printing the result for the query
             int i = 1;
-            for (Content result : trie.search(query, 5)) {
+            for (Content result : dataIndex.search(query, 5)) {
                 System.out.println(i++ + ") " + result.toString());
             }
         }
