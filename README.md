@@ -40,7 +40,7 @@
 
 Замечание: Реализация не поддерживает многопоточный запуск, если мы хотим это сделать, требуется добавить mutex на запись и чтение.
 
-Примеры запросов с ответами:
+### Примеры запросов с ответами:
 ```
 Enter your query: Romeo
 Suggestions to your query: 
@@ -58,7 +58,7 @@ Suggestions to your query:
 2) William Shakespeare's Romeo and Juliet
 ```
 
-Пример запроса с опечаткой:
+### Пример запроса с опечаткой:
 ```
 Enter your query: Julie
 Suggestions to your query: 
