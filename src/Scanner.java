@@ -16,6 +16,7 @@ public class Scanner implements AutoCloseable {
         this.reader = new BufferedReader(new InputStreamReader(stream));
     }
 
+    @Override
     public void close() {
         try {
             reader.close();

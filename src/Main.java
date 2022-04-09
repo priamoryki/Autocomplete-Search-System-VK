@@ -1,4 +1,3 @@
-import search.StringUtils;
 import search.autocomplete.index.DataIndex;
 import search.content.Content;
 import search.content.Query;

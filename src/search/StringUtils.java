@@ -20,14 +20,19 @@ public class StringUtils {
         for (int i = 1; i < s1.length() + 1; i++) {
             for (int j = 1; j < s2.length() + 1; j++) {
                 dp[i][j] = Math.min(
-                        Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1),
-                        dp[i - 1][j - 1] + (s1.charAt(i - 1) != s2.charAt(j - 1) ? 1 : 0)
+                        Math.min(dp[i - 1][j], dp[i][j - 1]) + 1,
+                        dp[i - 1][j - 1] + (s1.charAt(i - 1) == s2.charAt(j - 1) ? 0 : 1)
                 );
             }
         }
         return dp[s1.length()][s2.length()];
     }
 
+    /**
+     * @param s1 first word
+     * @param s2 second word
+     * @return max index such that forall i < index : s1.charAt(i) == s2.charAt(i)
+     */
     public static int getCommonPrefix(String s1, String s2) {
         int i = 0, len = Math.min(s1.length(), s2.length());
         while (i < len && s1.charAt(i) == s2.charAt(i)) {

@@ -23,11 +23,11 @@ public final class LevenshteinAutomata extends Automata {
         }
     }
 
-    private LevenshteinAutomata(String pattern, String word, double threshold, int[] vector) {
+    private LevenshteinAutomata(String pattern, String word, double threshold, int[] distances) {
         super(pattern, word);
         this.size = pattern.length() + 1;
         this.threshold = threshold;
-        this.distances = vector;
+        this.distances = distances;
     }
 
     private int getDistance() {

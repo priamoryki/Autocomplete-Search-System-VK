@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
  * <p>
  * Note: This can be easily made as abstraction, but I don't want this for the sake of execution time optimization.
  * </p>
- * @see DataIndexNode
- * @see LevenshteinAutomata
  *
  * @author Pavel Lymar
+ * @see DataIndexNode
+ * @see LevenshteinAutomata
  */
 public class DataIndex {
     private final DataIndexNode root;
@@ -74,10 +74,10 @@ public class DataIndex {
     }
 
     /**
-     * @see #search(String)
      * @param phrase query to base on.
-     * @param limit limit of {@link Content} that will be returned.
+     * @param limit  limit of {@link Content} that will be returned.
      * @return sorted result of search.
+     * @see #search(String)
      */
     public List<Content> search(String phrase, int limit) {
         return search(phrase).stream().limit(limit).collect(Collectors.toList());
@@ -86,10 +86,10 @@ public class DataIndex {
     /**
      * Returns sorted {@link List} of {@link Content}.
      * If input has list of words searches for each word and makes the intersection of results.
-     * @see #search(DataIndexNode, String, Automata)
      *
      * @param phrase query to base on.
      * @return sorted result of search.
+     * @see #search(DataIndexNode, String, Automata)
      */
     public List<Content> search(String phrase) {
         ArrayDeque<String> words = StringUtils.splitIntoWords(phrase.toLowerCase());
@@ -106,8 +106,8 @@ public class DataIndex {
     }
 
     /**
-     * @param node current node in the tree.
-     * @param prefix prefix name of this node.
+     * @param node     current node in the tree.
+     * @param prefix   prefix name of this node.
      * @param automata automata to base search on.
      * @return allContent of {@code DataIndexNode}'s corresponding to the {@code automata}.
      */
